@@ -4,68 +4,70 @@ import falcon
 import json
 import requests
 import datetime
-import sys
 from requests.exceptions import ConnectionError
 from requests.exceptions import ReadTimeout
 from requests.exceptions import ConnectTimeout
+from urllib3.exceptions import MaxRetryError
 from waitress import serve
 from json import dumps
 from falcon.media.validators import jsonschema
+import random
+import argparse
 
-path = '/activity'
+# Create parser
+parser = argparse.ArgumentParser()
+
+# Add arguments to the parser
+parser.add_argument("--port", type=int, help="Port on which the REST server is running")
+
+# Define global variables
+sensor_path = '/activity'
+info_path = '/'
 port = None
-proxy = None
 
-
-class ActivityTracker(object):
+class DeviceInfo(object):
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200  # This is the default status
         device_info = {
             'type' : 'ActivityTracker',
             'paths' : {
-                'post': path,
-                'get' : path,
-                'egde': proxy
-            } 
+                'get': sensor_path,
+                'info' : info_path    
+            }
         }
         resp.body = dumps(device_info)
 
 
-    def on_post(self, req, resp):
-        # TODO: add json schema for validation
-        resp.status = falcon.HTTP_200
-        resp.body = "OK"
-        data = req.media
-        json = dumps(data)
-        try :
-            r = requests.post(proxy, data=json, timeout=0.05)
-            print("Sending to " + proxy + " -> " + str(json) + " -> " + str(r))
-        except (ReadTimeout, ConnectTimeout):
-            print("Sending to " + proxy + " -> TIMEOUT" )
-            r = "No response"
+class ActivityTracker(object):
+    def on_get(self, req, resp):
+        resp.status = falcon.HTTP_200  # This is the default status
+        message = "Activity requested from " + str(port)
+ 
+        device_info = {
+            'type' : 'ActivityTracker',
+            'steps' : random.randrange(0, 5, 1),
+            'time' : str(datetime.datetime.now())
+        }
+        resp.body = dumps(device_info)
 
+        print(message)
+    
+# Parse the arguments 
+args = parser.parse_args()
 
-print ('Number of arguments: ' + str(len(sys.argv)))
-assert len(sys.argv) == 3, "Not enough arguments"
+# Read from arguments and set up this device
+port = int(args.port)
 
-# settings for this device
-port = int(sys.argv[1]) # e.g. 8000
-proxy = str(sys.argv[2]) # e.g. 'http://127.0.0.1:7000/device0'
-
-print ("Activity data can be sent to <ip>:" + str(port) + str(path))
-print ("Forwarding data to edge device on: " + str(proxy))
-
-assert path != None, "The path is not set"
-assert proxy != None, "Edge device is not set"
-assert port > 0 and port <= 9000, "Port is not set"
+print("Activity data can requested at: " + str(port) + str(sensor_path))
 
 # falcon.API instances are callable WSGI apps
 app = falcon.API()
 
 # Resources are represented by long-lived class instances
-activity = ActivityTracker()
+heartrate = ActivityTracker()
+app.add_route(sensor_path, heartrate)
 
-# things will handle all requests to the '/things' URL path
-app.add_route(path, activity)
+info = DeviceInfo()
+app.add_route(info_path, info)
 
 serve(app, host="0.0.0.0", port=port)
