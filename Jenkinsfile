@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying....'
+                sh 'python deploy.py -u http://localhost:7002'
             }
         }
     }
