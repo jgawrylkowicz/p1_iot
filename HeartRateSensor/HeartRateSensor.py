@@ -18,9 +18,7 @@ import argparse
 parser = argparse.ArgumentParser()
 
 # Add arguments to the parser
-# Add arguments to the parser
 parser.add_argument("--port", type=int, help="Port on which the REST server is running")
-#parser.add_argument("--log", default=None, help="URL to which any logs will be sent. Useful for simualtions")
 
 # Define global variables
 sensor_path = '/heartrate'

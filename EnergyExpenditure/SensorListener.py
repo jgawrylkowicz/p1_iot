@@ -19,6 +19,7 @@ class SensorListener(threading.Thread):
         print("Starting sensor listener at " + str(self.url))
         print("Sending logs to " + self.log_url)
         while True:
+            print ("Trying to contact " + self.url) 
             resp = None
             if self.url: 
                 try:
