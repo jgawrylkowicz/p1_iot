@@ -9,7 +9,10 @@ from requests.exceptions import ConnectionError
 
 class SensorListener(threading.Thread): 
     def __init__(self, url, frequency, log_url):
-        self.frequency = frequency
+        if frequency > 0.1 and frequency < 10:
+            self.frequency = frequency
+        else:
+            self.frequency = 2
         self.url = url
         self.log_url = log_url
         threading.Thread.__init__(self)
