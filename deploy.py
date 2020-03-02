@@ -18,7 +18,7 @@ def update_device(id, version, params):
         'version': version,
         'params': params
     }
-    response = requests.post(simulator_url + "/devices/update/" + entry['version'], params=entry)
+    response = requests.post(simulator_url + "/devices/update/" + id, params=entry)
     print("Update of " + id + " : " + str(response))
 
     if response.status_code == 200:
@@ -44,10 +44,11 @@ for device in devices:
 
 updated_devices = sum(update_states)
 
-print(str(update_states) + " of " + str(len(update_states)) + " were updated.")
+print(str(updated_devices) + " of " + str(len(update_states)) + " were updated.")
 
 if updated_devices < len(devices):
-    print(str(len(devices) - len(updated_devices)) + " device(s) could not be updated! ")
+    not_updated_devices = len(devices) - updated_devices
+    print(str(not_updated_devices) + " device(s) could not be updated! ")
     sys.exit(-1)
 else:
     print("All devices are updated! ")
