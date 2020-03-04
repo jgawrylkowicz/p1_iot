@@ -1,18 +1,16 @@
-import random
-
 import requests
 import argparse
 import sys
-import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", "-u", help="Base url of the simulator")
+parser.add_argument("--step", "-s", nargs='?', help="Define how many devices should be updated in a single step", required=False)
+parser.add_argument("--force", "-f", nargs='?', type=bool,  help="Force stepwise update even with a low number of devices", required=False)
 
 
 # Update maximum of 'step' amount of devices at the time.
 # Check if the update was successful, fail the process if not.
-def update_step_wise(devices):
-    step = 2
+def update_step_wise(devices, step):
     it = iter(devices)
     wave = 0
     num_of_updated_devices = 0
@@ -89,16 +87,24 @@ def update_device(id, version, params):
 
 args = parser.parse_args()
 simulator_url = args.url
+step_size = args.step
+is_step_wise = args.force
+
+if is_step_wise and step_size == 0:
+    step_size = 2
+    print("Incorrect step size. Set to default of 2")
+
 print("Simulator URL: " + simulator_url)
+print("Step size: " + str(step_size))
+print("Forced step-wise: " + str(is_step_wise))
 
 devices = get_running_devices()
-
 if len(devices) == 0:
     print("No devices to update")
     sys.exit(-1)
 
 # different strategies depending on number of devices to be updated
-if len(devices) < 5:
-    update_simply(devices)
+if len(devices) > 5 or is_step_wise:
+    update_step_wise(devices, step_size)
 else:
-    update_step_wise(devices)
+    update_simply(devices)
