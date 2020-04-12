@@ -2,6 +2,10 @@ import requests
 import argparse
 import sys
 
+global simulator_url 
+global step_size 
+global is_step_wise 
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", "-u", help="Base url of the simulator")
 parser.add_argument("--step", "-s", nargs='?', help="Define how many devices should be updated in a single step", required=False)
@@ -90,7 +94,7 @@ simulator_url = args.url
 step_size = args.step
 is_step_wise = args.force
 
-if is_step_wise and step_size == 0:
+if is_step_wise or step_size is None:
     step_size = 2
     print("Incorrect step size. Set to default of 2")
 
