@@ -95,8 +95,8 @@ step_size = args.step
 is_step_wise = args.force
 
 if is_step_wise or step_size is None:
-    step_size = 2
-    print("Incorrect step size. Set to default of 2")
+    step_size = 3
+    print("Incorrect step size. Set to default of 3")
 
 print("Simulator URL: " + simulator_url)
 print("Step size: " + str(step_size))
